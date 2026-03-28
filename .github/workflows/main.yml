@@ -3,7 +3,19 @@ name: GitHub Actions Demo
 on: push
 
 jobs:
-  echo_hello_world:
+  build:
+    name: build application
     runs-on: ubuntu-latest
+
     steps:
-      - run: echo "hello world!!"
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+      - name: Install dependencies
+        run: npm install
+      - name: Build application
+        run: npm run build
