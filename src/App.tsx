@@ -1,10 +1,9 @@
-import { Button } from "@chakra-ui/react"
+import { StudyRecords } from './StudyRecords'
 
 function App() {
   return (
     <>
-      <h1>Hello Nakajima</h1>
-      <Button colorScheme="blue">Click me</Button>
+      <StudyRecords />
     </>
   )
 }
