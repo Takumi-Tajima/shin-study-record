@@ -1,11 +1,7 @@
-import { StudyRecords } from './StudyRecords'
+import { StudyRecordsPage } from './pages/StudyRecordsPage'
 
 function App() {
-  return (
-    <>
-      <StudyRecords />
-    </>
-  )
+  return <StudyRecordsPage />
 }
 
 export default App
