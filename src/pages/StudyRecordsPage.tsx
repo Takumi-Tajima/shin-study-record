@@ -5,18 +5,27 @@ import { StudyRecordsTemplate } from '../components/templates/StudyRecordsTempla
 import { RecordList } from '../components/organisms/RecordList'
 import { LoadingSpinner } from '../components/atoms/LoadingSpinner'
 import { Button } from '@chakra-ui/react'
+import { Input } from '@chakra-ui/react'
 
 export const StudyRecordsPage = () => {
   const [records, setRecords] = useState<Record[]>([])
   const [loading, setLoading] = useState(true)
 
-  // const [studyContent, setStudyContent] = useState('')
-  // const [studyTime, setStudyTime] = useState('')
+  const [studyContent, setStudyContent] = useState('')
+  const [studyTime, setStudyTime] = useState('')
+
+  const handleChangeStudyContent = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setStudyContent(e.target.value)
+  }
+
+  const handleChangeStudyTime = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setStudyTime(e.target.value)
+  }
 
   // ここにインサートする処理を追記する
   const insertRecord = async () => {
     await supabase.from('study-record').insert([
-      { title: '勉強をするぜ', time: 120 },
+      { title: studyContent, time: Number(studyTime) },
     ])
   }
 
@@ -40,10 +49,10 @@ export const StudyRecordsPage = () => {
     <>
       <StudyRecordsTemplate>
         {loading ? <LoadingSpinner /> : <RecordList records={records} />}
+        <Input placeholder='勉強内容' value={studyContent} onChange={handleChangeStudyContent}/>
+        <Input placeholder='勉強時間' value={studyTime} onChange={handleChangeStudyTime}/>
+        <Button onClick={insertRecord}>レコードを追加</Button>
       </StudyRecordsTemplate>
-
-      {/* // ここでフォームを表示する */}
-      <Button onClick={insertRecord}>レコードを追加</Button>
     </>
   )
 }
