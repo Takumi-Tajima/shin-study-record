@@ -7,7 +7,7 @@ export const RecordList = ({ records }: Props) => (
   <List.Root>
     {records.map((r) => (
       <List.Item key={r.id}>
-        {r.title}（{r.time}時間）
+        {r.title}（{r.time}m）
       </List.Item>
     ))}
   </List.Root>
