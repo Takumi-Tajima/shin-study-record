@@ -22,28 +22,34 @@ export const StudyRecordsPage = () => {
     setStudyTime(e.target.value)
   }
 
-  // ここにインサートする処理を追記する
-  const insertRecord = async () => {
-    await supabase.from('study-record').insert([
-      { title: studyContent, time: Number(studyTime) },
-    ])
+  const fetchRecords = async () => {
+    const { data, error } = await supabase.from('study-record').select('*')
+    if (error) {
+      console.error(error)
+      return
+    }
+    if (data) {
+      const recordList: Record[] = data.map(
+        (row) => new Record(row.id, row.title, row.time),
+      )
+      setRecords(recordList)
+    }
   }
 
   useEffect(() => {
-    const fetchRecords = async () => {
-      const { data, error } = await supabase.from('study-record').select('*')
-      if (error) {
-        console.error(error)
-      } else if (data) {
-        const recordList: Record[] = data.map(
-          (row) => new Record(row.id, row.title, row.time),
-        )
-        setRecords(recordList)
-      }
-      setLoading(false)
-    }
-    fetchRecords()
+    fetchRecords().finally(() => setLoading(false))
   }, [])
+
+  const insertRecord = async () => {
+    const { error } = await supabase.from('study-record').insert([
+      { title: studyContent, time: Number(studyTime) },
+    ])
+    if (error) {
+      console.error(error)
+      return
+    }
+    await fetchRecords()
+  }
 
   return (
     <>
