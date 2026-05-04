@@ -48,6 +48,9 @@ export const StudyRecordsPage = () => {
       console.error(error)
       return
     }
+    // フォームの中身をリセット
+    setStudyContent('')
+    setStudyTime('')
     await fetchRecords()
   }
 
