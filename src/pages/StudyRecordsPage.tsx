@@ -3,24 +3,14 @@ import { supabase } from '../supabaseClient'
 import { Record } from '../domain/record'
 import { StudyRecordsTemplate } from '../components/templates/StudyRecordsTemplate'
 import { RecordList } from '../components/organisms/RecordList'
+import { RecordForm } from '../components/organisms/RecordForm'
 import { LoadingSpinner } from '../components/atoms/LoadingSpinner'
 import { Button } from '@chakra-ui/react'
-import { Input } from '@chakra-ui/react'
 
 export const StudyRecordsPage = () => {
   const [records, setRecords] = useState<Record[]>([])
   const [loading, setLoading] = useState(true)
-
-  const [studyContent, setStudyContent] = useState('')
-  const [studyTime, setStudyTime] = useState('')
-
-  const handleChangeStudyContent = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setStudyContent(e.target.value)
-  }
-
-  const handleChangeStudyTime = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setStudyTime(e.target.value)
-  }
+  const [open, setOpen] = useState(false)
 
   const fetchRecords = async () => {
     const { data, error } = await supabase.from('study-record').select('*')
@@ -40,28 +30,11 @@ export const StudyRecordsPage = () => {
     fetchRecords().finally(() => setLoading(false))
   }, [])
 
-  const insertRecord = async () => {
-    const { error } = await supabase.from('study-record').insert([
-      { title: studyContent, time: Number(studyTime) },
-    ])
-    if (error) {
-      console.error(error)
-      return
-    }
-    // フォームの中身をリセット
-    setStudyContent('')
-    setStudyTime('')
-    await fetchRecords()
-  }
-
   return (
-    <>
-      <StudyRecordsTemplate>
-        {loading ? <LoadingSpinner /> : <RecordList records={records} />}
-        <Input placeholder='勉強内容' value={studyContent} onChange={handleChangeStudyContent}/>
-        <Input placeholder='勉強時間' value={studyTime} onChange={handleChangeStudyTime}/>
-        <Button onClick={insertRecord}>レコードを追加</Button>
-      </StudyRecordsTemplate>
-    </>
+    <StudyRecordsTemplate>
+      {loading ? <LoadingSpinner /> : <RecordList records={records} />}
+      <Button onClick={() => setOpen(true)}>レコードを追加</Button>
+      <RecordForm open={open} onOpenChange={setOpen} onCreated={fetchRecords} />
+    </StudyRecordsTemplate>
   )
 }
