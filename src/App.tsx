@@ -1,9 +1,7 @@
+import { StudyRecordsPage } from './pages/StudyRecordsPage'
+
 function App() {
-  return (
-    <>
-      <h1>Hello Nakajima</h1>
-    </>
-  )
+  return <StudyRecordsPage />
 }
 
 export default App
