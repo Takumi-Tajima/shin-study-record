@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useForm, SubmitHandler } from 'react-hook-form'
 import { Dialog, Portal, Input, Button, Text, Stack } from '@chakra-ui/react'
 import { supabase } from '../../supabaseClient'
 
@@ -8,67 +8,34 @@ type Props = {
   onCreated: () => Promise<void>
 }
 
+type Inputs = {
+  studyContent: string
+  studyTime: number
+}
+
 export const RecordForm = ({ open, onOpenChange, onCreated }: Props) => {
-  const [studyContent, setStudyContent] = useState('')
-  const [studyTime, setStudyTime] = useState('')
-  const [contentError, setContentError] = useState('')
-  const [timeError, setTimeError] = useState('')
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<Inputs>()
 
-  const handleChangeStudyContent = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setStudyContent(e.target.value)
-  }
-
-  const handleChangeStudyTime = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setStudyTime(e.target.value)
-  }
-
-  const validate = () => {
-    let valid = true
-
-    if (!studyContent) {
-      setContentError('内容の入力は必須です')
-      valid = false
-    } else {
-      setContentError('')
-    }
-
-    if (!studyTime) {
-      setTimeError('時間の入力は必須です')
-      valid = false
-    } else if (Number(studyTime) < 0) {
-      setTimeError('時間は0以上である必要があります')
-      valid = false
-    } else {
-      setTimeError('')
-    }
-
-    return valid
-  }
-
-  const resetForm = () => {
-    setStudyContent('')
-    setStudyTime('')
-    setContentError('')
-    setTimeError('')
-  }
-
-  const insertRecord = async () => {
-    if (!validate()) return
-
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
     const { error } = await supabase.from('study-record').insert([
-      { title: studyContent, time: Number(studyTime) },
+      { title: data.studyContent, time: data.studyTime },
     ])
     if (error) {
       console.error(error)
       return
     }
-    resetForm()
+    reset()
     onOpenChange(false)
     await onCreated()
   }
 
   const handleCancel = () => {
-    resetForm()
+    reset()
     onOpenChange(false)
   }
 
@@ -78,45 +45,54 @@ export const RecordForm = ({ open, onOpenChange, onCreated }: Props) => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header>
-              <Dialog.Title>新規レコード</Dialog.Title>
-            </Dialog.Header>
-            <Dialog.Body>
-              <Stack gap={4}>
-                <Stack gap={1}>
-                  <Input
-                    placeholder='勉強内容'
-                    value={studyContent}
-                    onChange={handleChangeStudyContent}
-                  />
-                  {contentError && (
-                    <Text color='red.500' fontSize='sm'>
-                      {contentError}
-                    </Text>
-                  )}
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Dialog.Header>
+                <Dialog.Title>新規レコード</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                <Stack gap={4}>
+                  <Stack gap={1}>
+                    <Input
+                      placeholder='勉強内容'
+                      {...register('studyContent', {
+                        required: '内容の入力は必須です',
+                      })}
+                    />
+                    {errors.studyContent && (
+                      <Text color='red.500' fontSize='sm'>
+                        {errors.studyContent.message}
+                      </Text>
+                    )}
+                  </Stack>
+                  <Stack gap={1}>
+                    <Input
+                      type='number'
+                      placeholder='勉強時間'
+                      {...register('studyTime', {
+                        required: '時間の入力は必須です',
+                        min: {
+                          value: 0,
+                          message: '時間は0以上である必要があります',
+                        },
+                        valueAsNumber: true,
+                      })}
+                    />
+                    {errors.studyTime && (
+                      <Text color='red.500' fontSize='sm'>
+                        {errors.studyTime.message}
+                      </Text>
+                    )}
+                  </Stack>
                 </Stack>
-                <Stack gap={1}>
-                  <Input
-                    type='number'
-                    placeholder='勉強時間'
-                    value={studyTime}
-                    onChange={handleChangeStudyTime}
-                  />
-                  {timeError && (
-                    <Text color='red.500' fontSize='sm'>
-                      {timeError}
-                    </Text>
-                  )}
-                </Stack>
-              </Stack>
-            </Dialog.Body>
-            <Dialog.Footer>
-              <Button variant='outline' onClick={handleCancel}>
-                キャンセル
-              </Button>
-              <Button onClick={insertRecord}>登録</Button>
-            </Dialog.Footer>
-            <Dialog.CloseTrigger />
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button type='button' variant='outline' onClick={handleCancel}>
+                  キャンセル
+                </Button>
+                <Button type='submit'>登録</Button>
+              </Dialog.Footer>
+              <Dialog.CloseTrigger />
+            </form>
           </Dialog.Content>
         </Dialog.Positioner>
       </Portal>
